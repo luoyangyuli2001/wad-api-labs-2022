@@ -4,6 +4,10 @@ import uniqid from 'uniqid';
 
 const router = express.Router(); 
 
+router.get('/', (req, res) => {
+    res.json(movies);
+});
+
 // Get movie details
 router.get('/:id', (req, res) => {
   const id = parseInt(req.params.id);
