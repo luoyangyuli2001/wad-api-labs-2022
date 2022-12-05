@@ -37,9 +37,13 @@ router.post('/:userName/favourites', asyncHandler(async (req, res) => {
     const userName = req.params.userName;
     const movie = await movieModel.findByMovieDBId(newFavourite);
     const user = await User.findByUserName(userName);
-    await user.favourites.push(movie._id);
-    await user.save(); 
-    res.status(201).json(user); 
+    if (user.favourites.includes(movie._id)) {
+        res.status(201).json({code: 201, msg: 'Already exists in favourites.'})
+    } else {
+        await user.favourites.push(movie._id);
+        await user.save(); 
+        res.status(201).json(user); 
+    }
   }));
 
 // Register OR authenticate a user
@@ -49,6 +53,10 @@ router.post('/',asyncHandler( async (req, res, next) => {
       return next();
     }
     if (req.query.action === 'register') {
+      var regExp = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{5,}$/
+      if (!regExp.test(req.body.password)) {
+        res.status(401).json({ success: false, msg: 'The password should be at least 5 characters long and contain at least one number and one letter.'})
+      }
       await User.create(req.body);
       res.status(201).json({code: 201, msg: 'Successful created new user.'});
     } else {
